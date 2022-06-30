@@ -1,0 +1,41 @@
+[package]
+name = "tfreg"
+description = "Registry serving terraform providers from github releases"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/mattclement/tfreg"
+
+[dependencies]
+anyhow = "1.0.57"
+axum = { version = "0.5.6", features = ["headers"] }
+axum-extra = { version = "0.3.3", features = ["spa"] }
+futures = "0.3.21"
+futures-util = "0.3"
+oauth2 = { version = "4.2.0" }
+octocrab = "0.16.0"
+reqwest = { version = "0.11.10", features = ["stream"], default-features = false }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_urlencoded = "0.7.1"
+tokio = { version = "1.0", features = ["full"] }
+tokio-util = { version = "0.7.2", features = ["io"] }
+toml = "0.5.9"
+tower-http = { version = "0.3.3", features = ["trace", "compression-full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+sequoia-openpgp = { version = "1.9.0", default-features = false, features = ["allow-experimental-crypto", "allow-variable-time-crypto", "crypto-rust"] }
+opentelemetry = { version = "0.17.0", features = ["rt-tokio"] }
+opentelemetry-otlp = "0.10.0"
+tracing-opentelemetry = "0.17.2"
+clap = { version = "3.2.6", features = ["derive", "env"] }
+thiserror = "1.0.31"
+orion = "0.17.1"
+base64 = "0.13.0"
+
+[profile.release]
+strip = "symbols"
+lto = "thin"
+
+[profile.dev]
+opt-level = 1
