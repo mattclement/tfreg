@@ -11,6 +11,7 @@ use crate::app_config::AppConfig;
 use super::{OAuth2Error, Result, AUTH_URL, TOKEN_URL};
 
 const BASE64_FORMAT: base64::Config = base64::URL_SAFE;
+
 pub fn base64url_encode<T: AsRef<[u8]>>(key_bytes: T) -> String {
     base64::encode_config(key_bytes, BASE64_FORMAT)
 }
@@ -41,4 +42,23 @@ pub fn current_epoch() -> u64 {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs()
+}
+
+pub fn generate_random_key() -> Result<[u8; 64]> {
+    let mut key_bytes = [0u8; 64];
+    orion::util::secure_rand_bytes(&mut key_bytes).map_err(OAuth2Error::Encryption)?;
+    Ok(key_bytes)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn base64() {
+        let key = generate_random_key().unwrap();
+        let encoded = base64url_encode(key);
+        let decoded = base64url_decode(encoded).unwrap();
+        assert_eq!(key.to_vec(), decoded);
+    }
 }

@@ -100,6 +100,8 @@ async fn check_repo_permissions(token: String, repo: &Repo) -> Result<(), Status
     Ok(())
 }
 
+/// Extract the repo specified in the given URL path. This is designed to handle paths that point
+/// at either the downloads API or the provider API.
 fn repo_from_path(path: &str) -> Option<Repo> {
     let repo_components_in_url_path = path
         .trim_start_matches('/')
@@ -114,4 +116,24 @@ fn repo_from_path(path: &str) -> Option<Repo> {
         repo_components_in_url_path.first()?.to_string(),
         repo_components_in_url_path.last()?.to_string(),
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_repo_from_path() {
+        let expected = Repo::new("org".to_string(), "name".to_string());
+
+        assert_eq!(
+            expected,
+            repo_from_path("/downloads/org/terraform-provider-name/2.3.4/SHA256SUMS").unwrap()
+        );
+
+        assert_eq!(
+            expected,
+            repo_from_path("/org/terraform-provider-name/2.3.4/SHA256SUMS").unwrap()
+        )
+    }
 }
