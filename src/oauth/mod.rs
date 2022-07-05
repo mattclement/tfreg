@@ -8,7 +8,7 @@ use std::{
 use oauth2::{
     AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier, RedirectUrl, TokenResponse,
 };
-use orion::{aead, util::secure_rand_bytes};
+use orion::aead;
 use tokio::sync::RwLock;
 
 use crate::app_config::AppConfig;
@@ -107,8 +107,7 @@ impl Authenticator {
         // a bit. If we want to support horizontal scaling of this server (lol) we will have to
         // write the actual token out so any other instance that has the secret key can use the
         // token.
-        let mut key_bytes = [0u8; 64];
-        secure_rand_bytes(&mut key_bytes).map_err(OAuth2Error::Encryption)?;
+        let key_bytes = utils::generate_random_key()?;
 
         let key = utils::base64url_encode(key_bytes);
         let expires_at =
