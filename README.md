@@ -2,6 +2,8 @@
 
 `tfreg` is a terraform registry server that serves assets stored in github releases.
 
+![Demo terminal output of tfreg workflow](.github/images/demo.png)
+
 ## Features
 - An opinionated implementation of the terraform provider registry. See [required repo structure](#required-repo-structure) for more details.
 - A Terraform Login server. This is required for use with private providers, as it uses the github oauth2 flow to use your permissions for downloading assets.
