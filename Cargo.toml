@@ -13,7 +13,8 @@ axum-extra = { version = "0.3.3", features = ["spa"] }
 futures = "0.3.21"
 futures-util = "0.3"
 oauth2 = { version = "4.2.0" }
-octocrab = { version = "0.16.0", default-features = false, features = ["rustls"] }
+# octocrab = { version = "0.19.0", features = ["rustls"] } # held back: https://github.com/XAMPPRocky/octocrab/issues/344
+octocrab = { git = "https://github.com/XAMPPRocky/octocrab", rev = "7061b48c9bb799cb7effa0ecb8fd366a23f13de2", features = ["rustls"] }
 reqwest = { version = "0.11.10", features = ["stream"], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -24,7 +25,7 @@ toml = "0.5.9"
 tower-http = { version = "0.3.3", features = ["trace", "compression-full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
-sequoia-openpgp = { version = "1.9.0", default-features = false, features = ["allow-experimental-crypto", "allow-variable-time-crypto", "crypto-rust"] }
+sequoia-openpgp = { version = "1.15.0", default-features = false, features = ["allow-experimental-crypto", "allow-variable-time-crypto", "crypto-rust"] }
 opentelemetry = { version = "0.17.0", features = ["rt-tokio"] }
 opentelemetry-otlp = "0.10.0"
 tracing-opentelemetry = "0.17.2"

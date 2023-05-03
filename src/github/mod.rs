@@ -311,15 +311,13 @@ impl Client {
         let client = octocrab::Octocrab::builder()
             .personal_token(token)
             .build()?;
-        let req = client
-            .request_builder(url, reqwest::Method::GET)
-            .header("Accept", "application/octet-stream");
-        let res = client.execute(req).await?.error_for_status()?;
+        let res = client._get(url.to_string()).await?;
         tokio::fs::create_dir_all(destination.parent().unwrap()).await?;
         let mut out = tokio::fs::File::create(destination).await?;
 
         let mut download_stream = StreamReader::new(
-            res.bytes_stream()
+            res.into_body()
+                .into_stream()
                 .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e)),
         );
         tokio::io::copy(&mut download_stream, &mut out).await?;
