@@ -8,8 +8,8 @@ repository = "https://github.com/mattclement/tfreg"
 
 [dependencies]
 anyhow = "1.0.57"
-axum = { version = "0.5.6", features = ["headers"] }
-axum-extra = { version = "0.3.3", features = ["spa"] }
+axum = { version = "0.6", features = ["headers"] }
+axum-macros = "0.3"
 futures = "0.3.21"
 futures-util = "0.3"
 oauth2 = { version = "4.2.0" }
@@ -22,7 +22,7 @@ serde_urlencoded = "0.7.1"
 tokio = { version = "1.0", features = ["full"] }
 tokio-util = { version = "0.7.2", features = ["io"] }
 toml = "0.5.9"
-tower-http = { version = "0.3.3", features = ["trace", "compression-full"] }
+tower-http = { version = "0.4", features = ["trace", "compression-full", "fs"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 sequoia-openpgp = { version = "1.15.0", default-features = false, features = ["allow-experimental-crypto", "allow-variable-time-crypto", "crypto-rust"] }
