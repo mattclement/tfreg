@@ -125,7 +125,7 @@ pub fn load() -> Result<AppConfig> {
     let mut conf = AppConfig::default();
 
     if let Some(p) = &cli_args.config {
-        let file_conf: ConfigSource = toml::from_slice(&fs::read(p)?)?;
+        let file_conf: ConfigSource = toml::from_str(&fs::read_to_string(p)?)?;
         conf.merge_source_config(file_conf);
     }
 
