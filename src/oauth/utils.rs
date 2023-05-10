@@ -7,19 +7,18 @@ use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, TokenUrl};
 use orion::aead;
 
 use crate::app_config::AppConfig;
+use base64::{engine::general_purpose, Engine as _};
 
 use super::{OAuth2Error, Result, AUTH_URL, TOKEN_URL};
 
-const BASE64_FORMAT: base64::Config = base64::URL_SAFE;
-
 pub fn base64url_encode<T: AsRef<[u8]>>(key_bytes: T) -> String {
-    base64::encode_config(key_bytes, BASE64_FORMAT)
+    general_purpose::URL_SAFE.encode(key_bytes)
 }
 
 pub fn base64url_decode<T: AsRef<[u8]>>(
     key_bytes: T,
 ) -> std::result::Result<Vec<u8>, base64::DecodeError> {
-    base64::decode_config(key_bytes, BASE64_FORMAT)
+    general_purpose::URL_SAFE.decode(key_bytes)
 }
 
 pub fn build_secret_key(secret_key: &str) -> Result<Arc<aead::SecretKey>> {
