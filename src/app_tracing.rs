@@ -267,7 +267,7 @@ impl<B> OnResponse<B> for OtelOnResponse {
         span.record("http.status_code", &tracing::field::display(status));
 
         // assume there is no error, if there is `OtelOnFailure` will be called and override this
-        span.record("otel.status_code", &"OK");
+        span.record("otel.status_code", "OK");
         tracing::info!("Request finished");
     }
 }
@@ -308,15 +308,15 @@ pub struct OtelOnFailure;
 
 impl OnFailure<ServerErrorsFailureClass> for OtelOnFailure {
     fn on_failure(&mut self, failure: ServerErrorsFailureClass, _latency: Duration, span: &Span) {
-        span.record("error", &true);
+        span.record("error", true);
         match failure {
             ServerErrorsFailureClass::StatusCode(status) => {
                 if status.is_server_error() {
-                    span.record("otel.status_code", &"ERROR");
+                    span.record("otel.status_code", "ERROR");
                 }
             }
             ServerErrorsFailureClass::Error(_) => {
-                span.record("otel.status_code", &"ERROR");
+                span.record("otel.status_code", "ERROR");
             }
         }
     }
