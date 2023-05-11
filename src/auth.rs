@@ -38,8 +38,8 @@ async fn auth_flow_handler(
 }
 
 async fn token_handler(
-    Form(params): Form<TokenRequest>,
     Extension(authenticator): Extension<Arc<Authenticator>>,
+    Form(params): Form<TokenRequest>,
 ) -> Result<Json<Value>, StatusCode> {
     match authenticator.exchange_code_for_token(params).await {
         Ok(c) => Ok(Json(json!({ "access_token": c }))),

@@ -31,7 +31,7 @@ impl AssetCache {
             .join(&repo.org)
             .join(&repo.name)
             .join(tag)
-            .join(&filename)
+            .join(filename)
     }
 
     pub async fn get_asset(&self, repo: &Repo, tag: &ReleaseTag, name: &str) -> Result<Vec<u8>> {
