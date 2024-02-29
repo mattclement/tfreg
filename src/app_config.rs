@@ -11,7 +11,8 @@ pub struct AppConfig {
     pub log_level: String,
     pub cache_dir: PathBuf,
     pub secret_key: String,
-    pub oltp_endpoint: Option<String>,
+    pub otlp_endpoint: Option<String>,
+    pub otlp_headers: Option<String>,
     pub log_format: LogFormat,
 }
 
@@ -38,8 +39,11 @@ impl AppConfig {
         if let Some(secret_key) = c.secret_key {
             self.secret_key = secret_key;
         }
-        if let Some(oltp_endpoint) = c.otlp_endpoint {
-            self.oltp_endpoint = Some(oltp_endpoint);
+        if let Some(otlp_endpoint) = c.otlp_endpoint {
+            self.otlp_endpoint = Some(otlp_endpoint);
+        }
+        if let Some(otlp_headers) = c.otlp_headers {
+            self.otlp_headers = Some(otlp_headers);
         }
     }
 
@@ -68,7 +72,8 @@ impl Default for AppConfig {
             log_level: "tfreg=debug,tower_http=debug".into(),
             cache_dir,
             secret_key: "".to_string(),
-            oltp_endpoint: None,
+            otlp_endpoint: None,
+            otlp_headers: None,
             log_format: LogFormat::Compact,
         }
     }
@@ -115,9 +120,13 @@ struct ConfigSource {
     #[clap(long, hide_env_values(true), value_parser, env = "TFREG_SECRET_KEY")]
     pub secret_key: Option<String>,
 
-    /// URL to send OLTP traces to. Will only send traces if this property is specified.
-    #[clap(long, hide_env_values(true), value_parser, env = "TFREG_OLTP_ENDPOINT")]
+    /// URL to send OTLP traces to. Will only send traces if this property is specified.
+    #[clap(long, hide_env_values(true), value_parser, env = "TFREG_OTLP_ENDPOINT")]
     pub otlp_endpoint: Option<String>,
+
+    /// Additional headers in k=v,k=v format to send with OTLP traces.
+    #[clap(long, hide_env_values(true), value_parser, env = "TFREG_OTLP_HEADERS")]
+    pub otlp_headers: Option<String>,
 }
 
 pub fn load() -> Result<AppConfig> {

@@ -5,14 +5,13 @@ use axum::{
     extract::{ConnectInfo, MatchedPath, OriginalUri},
     response::Response,
 };
-use opentelemetry::{
-    sdk::propagation::TraceContextPropagator,
-    sdk::{
-        trace::{self, Sampler},
-        Resource,
-    },
-    KeyValue,
+use opentelemetry::KeyValue;
+use opentelemetry_otlp::WithExportConfig;
+use opentelemetry_sdk::{
+    trace::{self, Sampler},
+    Resource,
 };
+use std::collections::HashMap;
 use std::{borrow::Cow, net::SocketAddr, time::Duration};
 use tower_http::{
     classify::{ServerErrorsAsFailures, ServerErrorsFailureClass, SharedClassifier},
@@ -25,30 +24,42 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use crate::app_config::{AppConfig, LogFormat};
 
 pub fn init(config: &AppConfig) -> Result<()> {
-    opentelemetry::global::set_text_map_propagator(TraceContextPropagator::new());
+    let registry = tracing_subscriber::registry()
+        .with(logging_layer(&config.log_format))
+        .with(tracing_subscriber::EnvFilter::new(&config.log_level));
 
-    let sampler = match config.oltp_endpoint {
-        Some(_) => Sampler::AlwaysOn,
-        None => Sampler::AlwaysOff,
+    let Some(otlp_endpoint) = &config.otlp_endpoint else {
+        return Ok(registry.try_init()?);
     };
+
+    let mut map = HashMap::new();
+    if let Some(headers) = &config.otlp_headers {
+        for pair in headers.split(',') {
+            let kv: Vec<&str> = pair.split('=').collect();
+            if kv.len() == 2 {
+                map.insert(kv[0].to_string(), kv[1].to_string());
+            }
+        }
+    }
+
+    let exporter = opentelemetry_otlp::new_exporter()
+        .http()
+        .with_endpoint(otlp_endpoint)
+        .with_headers(map);
+
+    let trace_config = trace::config()
+        .with_sampler(Sampler::AlwaysOn)
+        .with_resource(Resource::new(vec![KeyValue::new("service.name", "tfreg")]));
 
     let tracer = opentelemetry_otlp::new_pipeline()
         .tracing()
-        .with_exporter(opentelemetry_otlp::new_exporter().tonic())
-        .with_trace_config(
-            trace::config()
-                .with_sampler(sampler)
-                .with_resource(Resource::new(vec![KeyValue::new("service.name", "tfreg")])),
-        )
-        .install_batch(opentelemetry::runtime::Tokio)?;
+        .with_exporter(exporter)
+        .with_trace_config(trace_config)
+        .install_batch(opentelemetry_sdk::runtime::Tokio)?;
 
-    tracing_subscriber::registry()
-        .with(logging_layer(&config.log_format))
+    Ok(registry
         .with(tracing_opentelemetry::layer().with_tracer(tracer))
-        .with(tracing_subscriber::EnvFilter::new(&config.log_level))
-        .try_init()?;
-
-    Ok(())
+        .try_init()?)
 }
 
 /// Construct a fmt layer based on the logging format requested.

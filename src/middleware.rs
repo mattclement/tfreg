@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
 use axum::{
-    http::{self, Request, StatusCode},
+    extract::Request,
+    http::{self, StatusCode},
     middleware::Next,
     response::IntoResponse,
 };
@@ -13,7 +14,7 @@ use crate::{github::Repo, oauth::Authenticator};
 // Determine whether the passed API key in the authorization header has read access to the github
 // repository indicated by the first two segments of the URL path (e.g.
 // /mattclement/example/foo/bar checks against github.com/mattclement/example).
-pub async fn header_auth<B>(mut req: Request<B>, next: Next<B>) -> impl IntoResponse {
+pub async fn header_auth(mut req: Request, next: Next) -> impl IntoResponse {
     let authenticator: &Arc<Authenticator> = req
         .extensions()
         .get()
@@ -47,7 +48,7 @@ struct TokenQS {
     token: String,
 }
 // query param auth values are only valid for a single use.
-pub async fn query_param_auth<B>(req: Request<B>, next: Next<B>) -> impl IntoResponse {
+pub async fn query_param_auth(req: Request, next: Next) -> impl IntoResponse {
     let authenticator: &Arc<Authenticator> = req
         .extensions()
         .get()

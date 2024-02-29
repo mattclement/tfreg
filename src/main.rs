@@ -1,4 +1,4 @@
-use std::{net::SocketAddr, sync::Arc};
+use std::sync::Arc;
 
 use anyhow::Result;
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Json, Router};
@@ -22,9 +22,8 @@ const DOWNLOAD_ROUTE_PREFIX: &str = "/downloads/";
 #[tokio::main]
 async fn main() -> Result<()> {
     let config = app_config::load()?;
-    let authenticator = Arc::new(oauth::Authenticator::new(&config)?);
-
     app_tracing::init(&config)?;
+    let authenticator = Arc::new(oauth::Authenticator::new(&config)?);
 
     let app = Router::new()
         .route(
@@ -43,11 +42,9 @@ async fn main() -> Result<()> {
         ))
         .layer(app_tracing::opentelemetry_tracing_layer());
 
-    // run it
     info!("listening on {}", config.addr);
-    axum::Server::bind(&config.addr)
-        .serve(app.into_make_service_with_connect_info::<SocketAddr>())
-        .await?;
+    let listener = tokio::net::TcpListener::bind(&config.addr).await.unwrap();
+    axum::serve(listener, app).await?;
     Ok(())
 }
 

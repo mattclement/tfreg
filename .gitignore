@@ -2,3 +2,4 @@
 .env
 cache
 .terraform*
+config.toml

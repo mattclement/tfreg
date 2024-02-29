@@ -5,6 +5,7 @@ use reqwest::Url;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
+    io::ErrorKind,
     path::{Path, PathBuf},
 };
 use tokio::sync::RwLock;
@@ -277,7 +278,7 @@ impl Client {
                 shasum,
                 shasums_url: download_base.join("SHA256SUMS").display().to_string(),
                 shasums_signature_url: sig_url.to_string(),
-                github_asset_url: release_asset.url.clone(),
+                github_asset_url: release_asset.browser_download_url.clone(),
             };
             assets.push(asset);
         }
@@ -315,12 +316,12 @@ impl Client {
         tokio::fs::create_dir_all(destination.parent().unwrap()).await?;
         let mut out = tokio::fs::File::create(destination).await?;
 
-        let mut download_stream = StreamReader::new(
-            res.into_body()
-                .into_stream()
-                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e)),
-        );
-        tokio::io::copy(&mut download_stream, &mut out).await?;
+        // Pulled some of this from octocrab itself.
+        let body_stream = http_body_util::BodyStream::new(res.into_body())
+            .try_filter_map(|frame| futures_util::future::ok(frame.into_data().ok()))
+            .map_err(|x| std::io::Error::new(ErrorKind::Other, x));
+        let mut body_stream_reader = StreamReader::new(body_stream);
+        tokio::io::copy(&mut body_stream_reader, &mut out).await?;
         Ok(())
     }
 
@@ -369,7 +370,7 @@ impl Client {
             "SHA256SUMS",
         );
 
-        self.download_file(token.clone(), checksum.url.clone(), dest)
+        self.download_file(token.clone(), checksum.browser_download_url.clone(), dest)
             .await?;
 
         Ok(())

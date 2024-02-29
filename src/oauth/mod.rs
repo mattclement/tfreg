@@ -209,8 +209,9 @@ mod tests {
             log_level: "no".into(),
             cache_dir: "./no".into(),
             secret_key: "11111111111111111111111111111111".into(),
-            oltp_endpoint: None,
+            otlp_endpoint: None,
             log_format: LogFormat::Json,
+            otlp_headers: None,
         })
         .unwrap()
     }
