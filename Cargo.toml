@@ -25,7 +25,7 @@ tokio = { version = "1.0", features = ["full"] }
 tokio-util = { version = "0.7.2", features = ["io"] }
 toml = "0.7"
 tower-http = { version = "0.5", features = ["trace", "compression-full", "fs"] }
-sequoia-openpgp = { version = "1.15.0", default-features = false, features = ["allow-experimental-crypto", "allow-variable-time-crypto", "crypto-rust"] }
+sequoia-openpgp = { version = "1.19.0", default-features = false, features = ["allow-experimental-crypto", "allow-variable-time-crypto", "crypto-rust"] }
 clap = { version = "3.2.6", features = ["derive", "env"] }
 thiserror = "1.0.31"
 orion = "0.17.1"
