@@ -23,17 +23,18 @@ Check the github [releases](https://github.com/mattclement/tfreg/releases) or cl
 
 Configuration values are listed below. **Required fields are shown in bold**. CLI args and environment variables will override values set in an optionally provided TOML configuration file.
 
-| Property                  | Example value    | as CLI flag        | as environment variable | as TOML property |
-| ------------------------- | ---------------- | ------------------ | ----------------------- | ---------------- |
-| config file               | `config.toml`    | `--config`         | `TFREG_CONFIG`          | N/A              |
-| listen addr               | `127.0.0.1:8080` | `--addr`           | `TFREG_ADDR`            | `addr`           |
-| rust log filter           | `tfreg=debug`    | `--log-level`      | `TFREG_LOG_LEVEL`       | `log_level`      |
-| stdout log format         | `pretty`         | `--log-format`     | `TFREG_LOG_FORMAT`      | `log_format`     |
-| OTLP trace collector URL  | `localhost:4317` | `--otlp-endpoint`  | `TFREG_OTLP_ENDPOINT`   | `otlp_endpoint`  |
-| cache directory           | `./cache`        | `--cache-dir`      | `TFREG_CACHE_DIR`       | `cache_dir`      |
-| **oauth2 client id**      | `abcdef1234`     | `--client-id`      | `TFREG_CLIENT_ID`       | `client_id`      |
-| **oauth2 client secret**  | `abcdef1234`     | `--client-secret`  | `TFREG_CLIENT_SECRET`   | `client_secret`  |
-| **secret key (32 bytes)** | `abcdef1234`     | `--secret-key`     | `TFREG_SECRET_KEY`      | `secret_key`     |
+| Property                      | Example value     | as CLI flag        | as environment variable | as TOML property |
+| ----------------------------- | ----------------- | ------------------ | ----------------------- | ---------------- |
+| config file                   | `config.toml`     | `--config`         | `TFREG_CONFIG`          | N/A              |
+| listen addr                   | `127.0.0.1:8080`  | `--addr`           | `TFREG_ADDR`            | `addr`           |
+| rust log filter               | `tfreg=debug`     | `--log-level`      | `TFREG_LOG_LEVEL`       | `log_level`      |
+| stdout log format             | `pretty`          | `--log-format`     | `TFREG_LOG_FORMAT`      | `log_format`     |
+| OTLP trace collector URL      | `localhost:4317`  | `--otlp-endpoint`  | `TFREG_OTLP_ENDPOINT`   | `otlp_endpoint`  |
+| OTLP trace collector headers  | `foo=bar,baz=qux` | `--otlp-headers`   | `TFREG_OTLP_HEADERS`    | `otlp_headers`   |
+| cache directory               | `./cache`         | `--cache-dir`      | `TFREG_CACHE_DIR`       | `cache_dir`      |
+| **oauth2 client id**          | `abcdef1234`      | `--client-id`      | `TFREG_CLIENT_ID`       | `client_id`      |
+| **oauth2 client secret**      | `abcdef1234`      | `--client-secret`  | `TFREG_CLIENT_SECRET`   | `client_secret`  |
+| **secret key (32 bytes)**     | `abcdef1234`      | `--secret-key`     | `TFREG_SECRET_KEY`      | `secret_key`     |
 
 Note: the rust log filter variable follows the [env logger syntax](https://docs.rs/env_logger/0.9.0/env_logger/#enabling-logging).
 
@@ -41,24 +42,24 @@ Note: the rust log filter variable follows the [env logger syntax](https://docs.
 
 A single version of a terraform provider corresponds to a github release.
 
-The [`v0.3.3` tagged release of `terraform-provider-hashicups`](https://github.com/hashicorp/terraform-provider-hashicups/releases/tag/v0.3.3) is possible to serve with `tfreg` as it follows the [repo structure rules](#repo-structure-rules):
+The [`v0.3.1` tagged release of `terraform-provider-cortex`](https://github.com/cortexapps/terraform-provider-cortex/releases/tag/v0.3.1) is possible to serve with `tfreg` as it follows the [repo structure rules](#repo-structure-rules):
 ```
-terraform-provider-hashicups_0.3.3_darwin_amd64.zip
-terraform-provider-hashicups_0.3.3_darwin_arm64.zip
-terraform-provider-hashicups_0.3.3_freebsd_386.zip
-terraform-provider-hashicups_0.3.3_freebsd_amd64.zip
-terraform-provider-hashicups_0.3.3_freebsd_arm.zip
-terraform-provider-hashicups_0.3.3_freebsd_arm64.zip
-terraform-provider-hashicups_0.3.3_linux_386.zip
-terraform-provider-hashicups_0.3.3_linux_amd64.zip
-terraform-provider-hashicups_0.3.3_linux_arm.zip
-terraform-provider-hashicups_0.3.3_linux_arm64.zip
-terraform-provider-hashicups_0.3.3_SHA256SUMS
-terraform-provider-hashicups_0.3.3_SHA256SUMS.sig
-terraform-provider-hashicups_0.3.3_windows_386.zip
-terraform-provider-hashicups_0.3.3_windows_amd64.zip
-terraform-provider-hashicups_0.3.3_windows_arm.zip
-terraform-provider-hashicups_0.3.3_windows_arm64.zip
+terraform-provider-cortex_0.3.1_darwin_amd64.zip
+terraform-provider-cortex_0.3.1_darwin_arm64.zip
+terraform-provider-cortex_0.3.1_freebsd_386.zip
+terraform-provider-cortex_0.3.1_freebsd_amd64.zip
+terraform-provider-cortex_0.3.1_freebsd_arm.zip
+terraform-provider-cortex_0.3.1_freebsd_arm64.zip
+terraform-provider-cortex_0.3.1_linux_386.zip
+terraform-provider-cortex_0.3.1_linux_amd64.zip
+terraform-provider-cortex_0.3.1_linux_arm.zip
+terraform-provider-cortex_0.3.1_linux_arm64.zip
+terraform-provider-cortex_0.3.1_SHA256SUMS
+terraform-provider-cortex_0.3.1_SHA256SUMS.sig
+terraform-provider-cortex_0.3.1_windows_386.zip
+terraform-provider-cortex_0.3.1_windows_amd64.zip
+terraform-provider-cortex_0.3.1_windows_arm.zip
+terraform-provider-cortex_0.3.1_windows_arm64.zip
 ```
 
 ### Repo structure rules
