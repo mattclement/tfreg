@@ -24,6 +24,10 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use crate::app_config::{AppConfig, LogFormat};
 
 pub fn init(config: &AppConfig) -> Result<()> {
+    if config.log_level == "disabled" {
+        return Ok(());
+    }
+
     let registry = tracing_subscriber::registry()
         .with(logging_layer(&config.log_format))
         .with(tracing_subscriber::EnvFilter::new(&config.log_level));
@@ -107,35 +111,6 @@ where
 /// - `otel.status_code`: `OK` if the response is success, `ERROR` if it is a 5xx
 /// - `trace_id`: The trace id as tracted via the remote span context.
 ///
-/// # Example
-///
-/// ```
-/// use axum::{Router, routing::get, http::Request};
-/// use axum_extra::middleware::opentelemetry_tracing_layer;
-/// use std::net::SocketAddr;
-/// use tower::ServiceBuilder;
-///
-/// let app = Router::new()
-///     .route("/", get(|| async {}))
-///     .layer(opentelemetry_tracing_layer());
-///
-/// # async {
-/// axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
-///     // we must use `into_make_service_with_connect_info` for `opentelemetry_tracing_layer` to
-///     // access the client ip
-///     .serve(app.into_make_service_with_connect_info::<SocketAddr, _>())
-///     .await
-///     .expect("server failed");
-/// # };
-/// ```
-///
-/// # Complete example
-///
-/// See the "opentelemetry-jaeger" example for a complete setup that includes an OpenTelemetry
-/// pipeline sending traces to jaeger.
-///
-/// [otel]: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md
-/// [`Router::into_make_service_with_connect_info`]: axum::Router::into_make_service_with_connect_info
 pub fn opentelemetry_tracing_layer() -> TraceLayer<
     SharedClassifier<ServerErrorsAsFailures>,
     OtelMakeSpan,

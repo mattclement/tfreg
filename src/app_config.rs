@@ -17,7 +17,7 @@ pub struct AppConfig {
 }
 
 impl AppConfig {
-    fn merge_source_config(&mut self, c: ConfigSource) {
+    pub fn merge_source_config(&mut self, c: ConfigSource) {
         if let Some(addr) = c.addr {
             self.addr = addr;
         }
@@ -47,7 +47,7 @@ impl AppConfig {
         }
     }
 
-    fn validate(&self) -> Result<()> {
+    pub fn validate(&self) -> Result<()> {
         if self.client_id.is_empty() {
             anyhow::bail!("Client ID must be set");
         }
@@ -78,6 +78,7 @@ impl Default for AppConfig {
         }
     }
 }
+
 #[derive(Debug, Clone, Deserialize, Serialize, clap::ValueEnum, PartialEq)]
 pub enum LogFormat {
     Compact,
@@ -87,7 +88,7 @@ pub enum LogFormat {
 
 #[derive(Parser, Serialize, Deserialize, Debug, Default)]
 #[clap(author, version, about)]
-struct ConfigSource {
+pub struct ConfigSource {
     /// TOML configuration file to read
     #[clap(long, hide_env_values(true), value_parser, env = "TFREG_CONFIG")]
     pub config: Option<PathBuf>,
