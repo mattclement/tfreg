@@ -2937,6 +2937,7 @@ name = "tfreg"
 version = "0.2.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "axum 0.7.4",
  "base64 0.21.7",
  "clap",

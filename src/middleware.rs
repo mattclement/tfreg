@@ -3,22 +3,21 @@ use std::sync::Arc;
 use axum::{
     extract::Request,
     http::{self, StatusCode},
-    middleware::Next,
-    response::IntoResponse,
+    Extension,
 };
 use serde::Deserialize;
 use tracing::{error, info, instrument};
 
-use crate::{github::Repo, oauth::Authenticator};
+use crate::{github::Repo, oauth::Authenticate};
 
 // Determine whether the passed API key in the authorization header has read access to the github
 // repository indicated by the first two segments of the URL path (e.g.
 // /mattclement/example/foo/bar checks against github.com/mattclement/example).
-pub async fn header_auth(mut req: Request, next: Next) -> impl IntoResponse {
-    let authenticator: &Arc<Authenticator> = req
-        .extensions()
-        .get()
-        .expect("Authenticator is unavailable as an request extension");
+pub async fn header_auth<T: Authenticate>(
+    Extension(authenticator): Extension<Arc<T>>,
+    mut req: Request,
+    next: axum::middleware::Next,
+) -> Result<axum::response::Response, StatusCode> {
     let token = req
         .headers()
         .get(http::header::AUTHORIZATION)
@@ -47,13 +46,13 @@ pub async fn header_auth(mut req: Request, next: Next) -> impl IntoResponse {
 struct TokenQS {
     token: String,
 }
-// query param auth values are only valid for a single use.
-pub async fn query_param_auth(req: Request, next: Next) -> impl IntoResponse {
-    let authenticator: &Arc<Authenticator> = req
-        .extensions()
-        .get()
-        .expect("Authenticator is unavailable as an request extension");
 
+// query param auth values are only valid for a single use.
+pub async fn query_param_auth<T: Authenticate>(
+    Extension(authenticator): Extension<Arc<T>>,
+    req: Request,
+    next: axum::middleware::Next,
+) -> Result<axum::response::Response, StatusCode> {
     let qs = req.uri().query().ok_or(StatusCode::UNAUTHORIZED)?;
     let token = serde_urlencoded::from_str::<TokenQS>(qs)
         .map_err(|e| {
@@ -65,7 +64,7 @@ pub async fn query_param_auth(req: Request, next: Next) -> impl IntoResponse {
     let repo = repo_from_path(req.uri().path()).ok_or(StatusCode::BAD_REQUEST)?;
 
     match authenticator
-        .verify_single_use_token(&token, req.uri().path())
+        .verify_single_use_token(token, req.uri().path().to_string())
         .await
     {
         Ok(t) => {

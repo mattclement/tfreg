@@ -1,8 +1,8 @@
+use crate::{middleware, oauth::Authenticate};
 use anyhow::Result;
 use axum::{
     extract::Path,
     http::{self, StatusCode},
-    middleware,
     routing::get,
     Extension, Json, Router,
 };
@@ -13,13 +13,12 @@ use tracing::{error, instrument};
 
 use crate::{
     github::{Download, GPGKey},
-    oauth::Authenticator,
     signature::GPGSigner,
 };
 
-pub async fn router(
+pub async fn router<T: Authenticate>(
     config: &crate::app_config::AppConfig,
-    auth: Arc<Authenticator>,
+    auth: Arc<T>,
 ) -> Result<Router> {
     let signer = GPGSigner::new()?;
     let client = crate::github::Client::new(
@@ -28,24 +27,29 @@ pub async fn router(
     )
     .await?;
 
+    let query_middleware = axum::middleware::from_fn(middleware::query_param_auth::<T>);
+    let header_middleware = axum::middleware::from_fn(middleware::header_auth::<T>);
+
     let sig_router = Router::new()
         .route("/:namespace/:provider/:version/signature", Signature::get())
-        .route_layer(middleware::from_fn(crate::middleware::query_param_auth));
+        .route_layer(query_middleware);
 
     let provider_router = Router::new()
         .route("/:namespace/:provider/versions", ListVersions::get())
         .route(
             "/:namespace/:provider/:version/download/:os/:arch",
-            FindPackage::get(),
+            FindPackage::get::<T>(),
         )
-        .route_layer(middleware::from_fn(crate::middleware::header_auth));
+        .route_layer(header_middleware);
 
-    Ok(Router::new()
+    let r = Router::new()
         .merge(sig_router)
         .merge(provider_router)
         .layer(Extension(Arc::new(signer)))
         .layer(Extension(Arc::new(client)))
-        .layer(Extension(auth)))
+        .layer(Extension(auth));
+
+    Ok(r)
 }
 
 // https://www.terraform.io/internals/provider-registry-protocol#list-available-versions
@@ -87,15 +91,15 @@ pub struct FindPackage {
 }
 
 impl FindPackage {
-    pub fn get() -> axum::routing::MethodRouter {
-        get(Self::handler)
+    pub fn get<T: Authenticate>() -> axum::routing::MethodRouter {
+        get(Self::handler::<T>)
     }
 
     #[instrument(skip_all, name = "find_package")]
-    async fn handler(
+    async fn handler<T: Authenticate>(
         Path(params): Path<Self>,
         Extension(token): Extension<String>,
-        Extension(authenticator): Extension<Arc<Authenticator>>,
+        Extension(authenticator): Extension<Arc<T>>,
         Extension(client): Extension<Arc<crate::github::Client>>,
     ) -> Result<Json<Download>, http::StatusCode> {
         // generate new time limited, single use session based off of this one that will

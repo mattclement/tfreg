@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use crate::oauth::Authenticate;
 use anyhow::Result;
 use axum::{
     extract::{Form, Query},
@@ -11,18 +12,18 @@ use axum::{
 use serde_json::{json, Value};
 use tracing::error;
 
-use crate::oauth::{types::AuthFlow, Authenticator, OAuth2Error, TokenRequest};
+use crate::oauth::{types::AuthFlow, OAuth2Error, TokenRequest};
 
-pub fn router(auth: Arc<Authenticator>) -> Result<Router> {
+pub fn router<T: Authenticate>(auth: Arc<T>) -> Result<Router> {
     Ok(Router::new()
-        .route("/authz", get(auth_flow_handler))
-        .route("/token", post(token_handler))
+        .route("/authz", get(auth_flow_handler::<T>))
+        .route("/token", post(token_handler::<T>))
         .layer(Extension(auth)))
 }
 
-async fn auth_flow_handler(
+async fn auth_flow_handler<T: Authenticate>(
     Query(params): Query<AuthFlow>,
-    Extension(authenticator): Extension<Arc<Authenticator>>,
+    Extension(authenticator): Extension<Arc<T>>,
 ) -> Result<Redirect, StatusCode> {
     match authenticator.start_auth_flow(params).await {
         Ok(url) => Ok(Redirect::to(&url)),
@@ -37,8 +38,8 @@ async fn auth_flow_handler(
     }
 }
 
-async fn token_handler(
-    Extension(authenticator): Extension<Arc<Authenticator>>,
+async fn token_handler<T: Authenticate>(
+    Extension(authenticator): Extension<Arc<T>>,
     Form(params): Form<TokenRequest>,
 ) -> Result<Json<Value>, StatusCode> {
     match authenticator.exchange_code_for_token(params).await {

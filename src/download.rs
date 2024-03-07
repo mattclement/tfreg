@@ -1,19 +1,21 @@
 use std::sync::Arc;
 
-use axum::{middleware, Extension, Router};
+use axum::{Extension, Router};
 use tower_http::compression::CompressionLayer;
 use tower_http::services::ServeDir;
 
-use crate::oauth::Authenticator;
+use crate::middleware;
+use crate::oauth::Authenticate;
 
-pub fn router(
+pub fn router<T: Authenticate>(
     config: &crate::app_config::AppConfig,
     path: &str,
-    auth: Arc<Authenticator>,
+    auth: Arc<T>,
 ) -> Router {
+    let query_middleware = axum::middleware::from_fn(middleware::query_param_auth::<T>);
     Router::new()
         .nest_service(path, ServeDir::new(&config.cache_dir))
-        .route_layer(middleware::from_fn(crate::middleware::query_param_auth))
+        .route_layer(query_middleware)
         .layer(CompressionLayer::new())
         .layer(Extension(auth))
 }

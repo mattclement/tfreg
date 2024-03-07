@@ -9,7 +9,7 @@ use orion::aead;
 use crate::app_config::AppConfig;
 use base64::{engine::general_purpose, Engine as _};
 
-use super::{OAuth2Error, Result, AUTH_URL, TOKEN_URL};
+use super::{OAuth2Error, Result};
 
 pub fn base64url_encode<T: AsRef<[u8]>>(key_bytes: T) -> String {
     general_purpose::URL_SAFE.encode(key_bytes)
@@ -27,12 +27,16 @@ pub fn build_secret_key(secret_key: &str) -> Result<Arc<aead::SecretKey>> {
         .map_err(OAuth2Error::Encryption)
 }
 
-pub fn build_oauth2_client_from_config(config: &AppConfig) -> Result<BasicClient> {
+pub fn build_oauth2_client_from_config(
+    config: &AppConfig,
+    auth_url: &str,
+    token_url: &str,
+) -> Result<BasicClient> {
     Ok(BasicClient::new(
         ClientId::new(config.client_id.clone()),
         Some(ClientSecret::new(config.client_secret.clone())),
-        AuthUrl::new(AUTH_URL.to_string())?,
-        Some(TokenUrl::new(TOKEN_URL.to_string())?),
+        AuthUrl::new(auth_url.to_string())?,
+        Some(TokenUrl::new(token_url.to_string())?),
     ))
 }
 

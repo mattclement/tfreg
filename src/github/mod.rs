@@ -265,7 +265,7 @@ impl Client {
             );
 
             let asset = ProviderAsset {
-                protocols: vec!["5.0".to_string()],
+                protocols: vec!["5.0".to_string()], // TODO: does this come from maniftest.json?
                 os_arch: OsArch {
                     os: os.unwrap().to_string(),
                     arch: arch.unwrap().to_string(),

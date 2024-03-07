@@ -38,6 +38,8 @@ opentelemetry-otlp = { version = "0.14", features = ["http-proto", "reqwest-clie
 
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+async-trait = "0.1.77"
+hex = "0.4.3"
 
 [profile.release]
 strip = "symbols"
