@@ -9,7 +9,7 @@ pub mod app_config;
 mod app_tracing;
 mod auth;
 mod download;
-mod github;
+pub mod github;
 mod middleware;
 pub mod oauth;
 mod provider_registry;
