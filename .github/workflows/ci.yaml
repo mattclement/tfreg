@@ -41,3 +41,8 @@ jobs:
 
     - name: Run cargo test
       run: cargo test --all-features
+      env:
+        TFREG_CLIENT_ID: 'no'
+        TFREG_CLIENT_SECRET: 'no'
+        TFREG_SECRET_KEY: 'no'
+        TFREG_TEST_PAT: '${{ secrets.GITHUB_TOKEN }}'
